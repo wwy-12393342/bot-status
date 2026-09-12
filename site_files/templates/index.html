@@ -41,8 +41,11 @@
 
     <!-- 更新公告（每个版本仅显示一次） -->
     <div id="update-overlay" class="overlay hidden">
-      <div class="overlay-card">
-        <h2 class="card-title">📢 更新公告</h2>
+      <div class="overlay-card" id="update-card">
+        <div class="overlay-head" id="update-head">
+          <h2 class="card-title">📢 更新公告</h2>
+          <button id="update-x" class="overlay-x" title="关闭" aria-label="关闭">✕</button>
+        </div>
         <div id="update-overlay-body" class="overlay-body"></div>
         <button id="update-close" class="btn btn-primary btn-block">我知道了</button>
       </div>
