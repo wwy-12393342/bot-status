@@ -30,7 +30,7 @@ UPLOAD_DIR = os.path.join(BASE_DIR, "static", "uploads")
 
 # 网站版本号：与本地插件 version.py 的 PLUGIN_VERSION 必须完全一致，
 # 不一致时网站会提示无法使用（防止新老版本混跑）。
-WEB_VERSION = "4.3.9"
+WEB_VERSION = "v5.21.39"
 
 # 插件同步超时（秒）：超过该时长未收到插件推送（如同步功能被关闭/插件离线），
 # 网站默认黑屏无法加载。可通过环境变量 POINTS_STALE_TIMEOUT 调整。
