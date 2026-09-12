@@ -3287,6 +3287,8 @@ const UPDATE_NOTES = [
       "修复网站聊天室：自己发的消息显示在左边、头像不对（兼容UID与QQ两种口径）",
       "修复网站头像错位：留言板/棋局/聊天室头像全部改为「UID→真实QQ」再取图",
       "修复「我的积分」不显示（改为按永久UID取数）；照片墙/图床 GitHub 化",
+      "更新公告弹窗：支持拖动、✕/Esc/点空白关闭、手机端适配（底部弹出、可滚动）",
+      "新增版本锁：网站与插件版本号不一致时，自动锁定为「离线模式」，积分相关功能不可用（防止新老版本混跑）",
     ],
   },
   {
@@ -3332,6 +3334,65 @@ const UPDATE_NOTES = [
   },
 ];
 
+function closeUpdateNotes() {
+  const latest = UPDATE_NOTES[0];
+  try {
+    if (latest) localStorage.setItem("update-notes-seen", latest.version);
+  } catch (e) {
+    /* 忽略存储异常 */
+  }
+  const ov = $("update-overlay");
+  if (ov) ov.classList.add("hidden");
+  void checkVersion();
+}
+
+// 弹窗可拖动（鼠标 + 触摸通用，指针事件）
+function initOverlayDrag() {
+  const card = $("update-card");
+  const head = $("update-head");
+  if (!card || !head) return;
+  let dragging = false;
+  let sx = 0, sy = 0, ox = 0, oy = 0;
+  const onDown = (e) => {
+    if (e.target.closest("button")) return;
+    const r = card.getBoundingClientRect();
+    dragging = true;
+    sx = e.clientX;
+    sy = e.clientY;
+    ox = r.left;
+    oy = r.top;
+    card.style.position = "fixed";
+    card.style.margin = "0";
+    card.style.transform = "none";
+    card.style.width = r.width + "px";
+    card.style.left = r.left + "px";
+    card.style.top = r.top + "px";
+    try {
+      head.setPointerCapture(e.pointerId);
+    } catch (err) {
+      /* 忽略 */
+    }
+  };
+  const onMove = (e) => {
+    if (!dragging) return;
+    card.style.left = ox + (e.clientX - sx) + "px";
+    card.style.top = oy + (e.clientY - sy) + "px";
+  };
+  const onUp = () => {
+    if (!dragging) return;
+    dragging = false;
+    const r = card.getBoundingClientRect();
+    card.style.left =
+      Math.max(4, Math.min(r.left, window.innerWidth - r.width - 4)) + "px";
+    card.style.top =
+      Math.max(4, Math.min(r.top, window.innerHeight - r.height - 4)) + "px";
+  };
+  head.addEventListener("pointerdown", onDown);
+  head.addEventListener("pointermove", onMove);
+  head.addEventListener("pointerup", onUp);
+  head.addEventListener("pointercancel", onUp);
+}
+
 function showUpdateNotes() {
   try {
     const seen = localStorage.getItem("update-notes-seen") || "";
@@ -3341,18 +3402,25 @@ function showUpdateNotes() {
       return;
     }
     const body = $("update-overlay-body");
-    const html = `<p class="hint">${escapeHtml(latest.date)} · v${escapeHtml(latest.version)}</p><ul>${latest.items.map((i) => `<li>${escapeHtml(i)}</li>`).join("")}</ul>`;
-    body.innerHTML = html;
-    $("update-overlay").classList.remove("hidden");
-    $("update-close").addEventListener("click", () => {
-      try {
-        localStorage.setItem("update-notes-seen", latest.version);
-      } catch (e) {
-        /* 忽略存储异常 */
-      }
-      $("update-overlay").classList.add("hidden");
-      void checkVersion();
+    body.innerHTML =
+      `<p class="hint">${escapeHtml(latest.date)} · v${escapeHtml(latest.version)}</p>` +
+      `<ul>${latest.items.map((i) => `<li>${escapeHtml(i)}</li>`).join("")}</ul>`;
+    const ov = $("update-overlay");
+    ov.classList.remove("hidden");
+    $("update-close").addEventListener("click", closeUpdateNotes);
+    const xBtn = $("update-x");
+    if (xBtn) xBtn.addEventListener("click", closeUpdateNotes);
+    // 点弹窗外的遮罩也能关
+    ov.addEventListener("click", (e) => {
+      if (e.target === ov) closeUpdateNotes();
     });
+    // Esc 关闭
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !ov.classList.contains("hidden")) {
+        closeUpdateNotes();
+      }
+    });
+    initOverlayDrag();
   } catch (e) {
     void checkVersion();
   }
@@ -3374,11 +3442,26 @@ async function checkVersion() {
             : " · 离线");
     }
     const banner = $("offline-banner");
-    if (!d.ok && !offlineMode) {
-      // 离线降级：不整站黑屏，改为顶部提示条；纯网站功能（聊天/留言/邮箱/反馈/五子棋）照常可用
+    if (!d.ok) {
+      // 版本不同步 / 插件离线 → 强制「离线模式」，只能使用离线功能
+      const pv = String(d.plugin_version || "").replace(/^v/, "");
+      const wv = String(d.web_version || "").replace(/^v/, "");
+      const mismatch = !!pv && !!wv && pv !== wv;
+      if (!offlineMode) {
+        offlineMode = true;
+        try {
+          localStorage.setItem("offline-mode", "1");
+        } catch (e) {
+          /* 忽略 */
+        }
+        applyOfflineMode();
+      }
       banner.textContent =
-        "⚠️ " + (d.message || "插件未同步") +
-        "——聊天室/留言板/邮箱/反馈/五子棋可正常使用，积分相关功能暂不可用。";
+        "🔒 " +
+        (mismatch
+          ? `版本不同步（网站 ${wv} / 插件 ${pv}）——已锁定为「离线模式」`
+          : d.message || "插件未同步——已锁定为「离线模式」") +
+        "：聊天室/留言板/邮箱/反馈/五子棋可用，积分相关功能不可用。";
       banner.classList.remove("hidden");
     } else {
       banner.classList.add("hidden");
