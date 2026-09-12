@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#4f6ef2" />
+    <title>积分系统</title>
+    <link rel="stylesheet" href="/static/style.css?v=v5.21.39" />
+  </head>
+  <body>
+    <!-- 免责声明（首次使用） -->
+    <div id="disclaimer-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2 class="card-title">使用须知</h2>
+        <div class="overlay-body">
+          <p>欢迎使用积分系统公开网站，使用前请知悉：</p>
+          <ul>
+            <li>积分、图片等数据以本地机器人实际数据为准，可能存在同步延迟；</li>
+            <li>图片托管于第三方免费图床，链接可能过期或失效；</li>
+            <li>请勿上传、发布违法违规内容，否则管理员有权删除并处理；</li>
+            <li>转账、赞赏、抽奖、瓜分等操作一旦执行不可撤回；</li>
+          </ul>
+          <p class="hint">继续使用本网站即表示您已阅读并同意以上条款。</p>
+        </div>
+        <button id="disclaimer-agree" class="btn btn-primary btn-block">我已阅读并同意</button>
+      </div>
+    </div>
+
+    <!-- 插件离线降级提示条（不阻断整站，聊天/留言/邮箱/五子棋等纯网站功能仍可用） -->
+    <div id="offline-banner" class="offline-banner hidden"></div>
+
+    <!-- 版本不匹配提示 -->
+    <div id="version-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2 class="card-title">⚠️ 无法使用</h2>
+        <p id="version-overlay-message" class="result"></p>
+        <p class="hint">本站依赖本地插件实时同步数据。请确保本地插件已启用「网站同步」且版本与网站一致，再点击下方按钮重试。</p>
+        <button id="version-refresh" class="btn btn-primary btn-block">刷新重试</button>
+      </div>
+    </div>
+
+    <!-- 更新公告（每个版本仅显示一次） -->
+    <div id="update-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2 class="card-title">📢 更新公告</h2>
+        <div id="update-overlay-body" class="overlay-body"></div>
+        <button id="update-close" class="btn btn-primary btn-block">我知道了</button>
+      </div>
+    </div>
+
+    <div class="bg-decor" aria-hidden="true">
+      <span class="blob blob-1"></span>
+      <span class="blob blob-2"></span>
+      <span class="blob blob-3"></span>
+    </div>
+
+    <button id="theme-toggle" class="theme-toggle" title="切换主题">🌙</button>
+    <button id="nav-toggle" class="nav-toggle hidden" title="导航">☰</button>
+
+    <!-- 左侧导航（登录后显示） -->
+    <nav id="sidebar" class="sidebar">
+      <div class="sidebar-head">
+        <div class="logo-mark">✦</div>
+        <span>积分系统</span>
+      </div>
+      <div id="user-badge" class="user-badge hidden"></div>
+      <div class="nav-section" id="nav-user">
+        <div class="nav-title">我的</div>
+        <button class="nav-item" data-page="points">我的积分</button>
+        <button class="nav-item" data-page="signin">每日签到</button>
+        <button class="nav-item" data-page="wall">照片墙</button>
+        <button class="nav-item" data-page="images">我的图片</button>
+        <button class="nav-item" data-page="random">随机图片</button>
+        <button class="nav-item" data-page="redeem">兑换码</button>
+        <button class="nav-item" data-page="shop">积分商城</button>
+        <button class="nav-item" data-page="lottery">积分抽奖</button>
+        <button class="nav-item" data-page="chat">聊天室</button>
+        <button class="nav-item" data-page="board">留言板</button>
+        <button class="nav-item" data-page="mail">站内邮箱</button>
+        <button class="nav-item" data-page="feedback">意见反馈</button>
+        <button class="nav-item" data-page="tasks">每日任务</button>
+        <button class="nav-item" data-page="auction">积分竞拍</button>
+        <button class="nav-item" data-page="gomoku">五子棋</button>
+        <button class="nav-item" data-page="viewer">观赏</button>
+        <button class="nav-item" data-page="favorites">我的收藏</button>
+        <button class="nav-item" data-page="rank">排行榜</button>
+        <button class="nav-item" data-page="profile">个人资料</button>
+        <button class="nav-item" data-page="settings">网站设置</button>
+      </div>
+      <div class="nav-section hidden" id="nav-admin">
+        <div class="nav-title">管理</div>
+        <button class="nav-item" data-page="admin-users">管理用户</button>
+        <button class="nav-item" data-page="admin-accounts">账号管理</button>
+        <button class="nav-item" data-page="admin-images">管理图片</button>
+        <button class="nav-item" data-page="admin-redeem">管理兑换码</button>
+        <button class="nav-item" data-page="admin-shop">管理商城</button>
+        <button class="nav-item" data-page="admin-bottles">管理漂流瓶</button>
+        <button class="nav-item" data-page="admin-announcement">管理公告</button>
+        <button class="nav-item" data-page="admin-lottery">管理抽奖</button>
+        <button class="nav-item" data-page="admin-auction">管理竞拍</button>
+        <button class="nav-item" data-page="admin-redeem-gen">生成兑换码</button>
+        <button class="nav-item" data-page="admin-feedback">反馈管理</button>
+        <button class="nav-item" data-page="admin-ledger">积分记录</button>
+      </div>
+    </nav>
+    <div id="sidebar-mask" class="sidebar-mask hidden"></div>
+
+    <main class="app">
+      <header class="app-header">
+        <h1>积分系统</h1>
+        <p id="login-info" class="sub login-info hidden"></p>
+      </header>
+
+      <!-- 公告 -->
+      <div id="announcement-bar" class="announcement hidden">
+        <span class="announcement-icon">📢</span>
+        <span id="announcement-text"></span>
+      </div>
+
+      <!-- 登录/注册 -->
+      <section id="auth-view" class="card login-card">
+        <div class="auth-tabs">
+          <button id="tab-login" class="auth-tab active">登录</button>
+          <button id="tab-register" class="auth-tab">注册</button>
+        </div>
+        <div id="login-form" class="auth-form">
+          <h2 class="card-title">欢迎回来</h2>
+          <label class="field">
+            <span>用户名</span>
+            <input id="login-username" type="text" placeholder="请输入用户名" autocomplete="username" />
+          </label>
+          <label class="field">
+            <span>密码</span>
+            <input id="login-password" type="password" placeholder="请输入密码" autocomplete="current-password" />
+          </label>
+          <button id="login-btn" class="btn btn-primary btn-block">登 录</button>
+          <p id="login-result" class="result"></p>
+          <p class="center"><a id="forgot-link" href="javascript:void(0)">忘记密码？</a></p>
+        </div>
+        <div id="recover-form" class="auth-form hidden">
+          <h2 class="card-title">找回密码</h2>
+          <p class="hint">先私聊机器人发送「/积分 cookieQQ」获取cookieQQ。</p>
+          <label class="field">
+            <span>用户名</span>
+            <input id="recover-username" type="text" placeholder="请输入用户名" />
+          </label>
+          <label class="field">
+            <span>cookieQQ（私聊获取，每10分钟更新）</span>
+            <input id="recover-verify" type="text" placeholder="如 FA75DC20" />
+          </label>
+          <label class="field">
+            <span>新密码（至少6位）</span>
+            <input id="recover-password" type="password" placeholder="新密码" />
+          </label>
+          <button id="recover-btn" class="btn btn-primary btn-block">重置密码</button>
+          <p id="recover-result" class="result"></p>
+          <p class="center"><a id="back-login-link" href="javascript:void(0)">返回登录</a></p>
+        </div>
+        <div id="register-form" class="auth-form hidden">
+          <h2 class="card-title">注册账号</h2>
+          <p class="hint">先私聊机器人发送「/积分 cookieQQ」获取cookieQQ，再填写以下信息。</p>
+          <label class="field">
+            <span>QQ号 / 用户ID</span>
+            <input id="reg-uid" type="text" placeholder="你的QQ号或openid" />
+          </label>
+          <label class="field">
+            <span>cookieQQ（私聊获取，每10分钟更新）</span>
+            <input id="reg-verify" type="text" placeholder="如 FA75DC20" />
+          </label>
+          <label class="field">
+            <span>用户名</span>
+            <input id="reg-username" type="text" placeholder="登录用户名" />
+          </label>
+          <label class="field">
+            <span>密码</span>
+            <input id="reg-password" type="password" placeholder="登录密码" />
+          </label>
+          <button id="register-btn" class="btn btn-primary btn-block">注 册</button>
+          <p id="register-result" class="result"></p>
+        </div>
+        <div class="mode-switch">
+          <span class="hint">当前模式：<b id="auth-mode-status">在线</b></span>
+          <button id="auth-offline-toggle" class="btn btn-ghost">切换到离线模式</button>
+        </div>
+      </section>
+
+      <!-- 功能页 -->
+      <div id="pages" class="pages hidden">
+        <section id="page-points" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">我的积分</h2>
+            <div id="my-points" class="points-hero"></div>
+            <div id="points-chart" class="chart-box"></div>
+            <div class="card-head">
+              <h3 class="card-title">最近积分明细</h3>
+              <div class="row-actions">
+                <button id="ledger-more-btn" class="btn btn-ghost">查看全部</button>
+                <button id="ledger-all-btn" class="btn btn-ghost">全部使用记录</button>
+              </div>
+            </div>
+            <div id="my-ledger" class="ledger"></div>
+          </div>
+        </section>
+
+        <section id="page-signin" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">每日签到</h2>
+              <button id="sign-btn" class="btn btn-primary">签到</button>
+            </div>
+            <p id="sign-calendar-title" class="calendar-title"></p>
+            <div id="sign-calendar" class="calendar"></div>
+            <p id="sign-result" class="result"></p>
+            <p class="hint">签到后当天不能再签到（网页与QQ通用）</p>
+          </div>
+        </section>
+
+        <section id="page-wall" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">照片墙</h2>
+              <div class="row-actions">
+                <button id="wall-sort-latest" class="btn active">最新</button>
+                <button id="wall-sort-likes" class="btn">最多赞</button>
+              </div>
+            </div>
+            <p class="hint">给喜欢的图片点赞，也可以打赏积分给作者。</p>
+            <div id="wall-grid" class="wall-grid"></div>
+            <div class="center row-actions">
+              <button id="wall-prev" class="btn">上一页</button>
+              <span id="wall-page-info" class="hint"></span>
+              <button id="wall-next" class="btn">下一页</button>
+            </div>
+            <p id="wall-result" class="result"></p>
+          </div>
+        </section>
+
+        <section id="page-images" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">我的图片</h2>
+              <button id="upload-btn" class="btn btn-primary">上传图片</button>
+            </div>
+            <input id="upload-file" type="file" accept="image/*" class="file-input hidden" />
+            <p id="upload-result" class="result"></p>
+            <div id="my-images" class="image-grid"></div>
+          </div>
+        </section>
+
+        <section id="page-random" class="page hidden">
+          <div class="card center">
+            <h2 class="card-title">随机图片</h2>
+            <button id="random-btn" class="btn btn-primary">换一张</button>
+            <div id="random-box" class="random-box hidden"></div>
+          </div>
+        </section>
+
+        <section id="page-redeem" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">使用兑换码</h2>
+            <div class="row">
+              <input id="redeem-code" type="text" placeholder="兑换码，如 XXXX-XXXX-XXXX-XXXX" />
+              <button id="redeem-btn" class="btn btn-primary">兑换</button>
+            </div>
+            <p id="redeem-result" class="result"></p>
+            <div id="redeem-history" class="history"></div>
+          </div>
+        </section>
+
+        <section id="page-shop" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">积分商城</h2>
+            <p id="shop-my-points" class="hint"></p>
+            <div id="shop-products" class="shop-grid"></div>
+          </div>
+        </section>
+
+        <section id="page-lottery" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">积分抽奖</h2>
+            <div id="lottery-box" class="lottery-box"></div>
+            <div id="lottery-my-result" class="result"></div>
+            <div class="card-head">
+              <h3 class="card-title">我的抽奖记录</h3>
+              <button class="btn btn-ghost collapse-toggle" data-target="lottery-my">展开</button>
+            </div>
+            <div id="lottery-my" class="history hidden"></div>
+            <div class="card-head">
+              <h3 class="card-title">最近中奖</h3>
+              <button class="btn btn-ghost collapse-toggle" data-target="lottery-log">展开</button>
+            </div>
+            <div id="lottery-log" class="history hidden"></div>
+          </div>
+          <div class="card">
+            <h2 class="card-title">瓜分池</h2>
+            <div id="split-box" class="split-box"></div>
+            <p id="split-result" class="result"></p>
+            <div class="card-head">
+              <h3 class="card-title">瓜分记录</h3>
+              <button class="btn btn-ghost collapse-toggle" data-target="split-records">展开</button>
+            </div>
+            <div id="split-records" class="history hidden"></div>
+          </div>
+        </section>
+
+        <section id="page-rank" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">积分排行榜</h2>
+              <div class="row-actions">
+                <button id="rank-all" class="btn active">总榜</button>
+                <button id="rank-week" class="btn">本周</button>
+                <button id="rank-month" class="btn">本月</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="table">
+                <thead>
+                  <tr><th>#</th><th>昵称</th><th>积分</th></tr>
+                </thead>
+                <tbody id="leaderboard-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="page-chat" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">聊天室</h2>
+              <button id="chat-redpacket-btn" class="btn btn-primary">🧧 发红包</button>
+            </div>
+            <p class="hint">消息每 3 秒自动刷新 · 自己靠右、其他人靠左 · 点消息可回复</p>
+            <div id="chat-redpackets" class="chat-redpackets"></div>
+            <div id="chat-messages" class="chat-messages"></div>
+            <div id="chat-reply-bar" class="chat-reply-bar hidden"></div>
+            <div class="row">
+              <button id="chat-dice-btn" class="btn" title="掷骰子">🎲</button>
+              <button id="chat-img-btn" class="btn" title="发图片">🖼️</button>
+              <input id="chat-img-file" type="file" accept="image/*" class="hidden" />
+              <input id="chat-input" type="text" placeholder="说点什么…（最多500字）" maxlength="500" />
+              <button id="chat-send-btn" class="btn btn-primary">发送</button>
+            </div>
+            <p id="chat-result" class="result"></p>
+          </div>
+        </section>
+
+        <section id="page-mail" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">站内邮箱</h2>
+              <button id="mail-compose-btn" class="btn btn-primary">写邮件</button>
+            </div>
+            <p class="hint">每个用户拥有 QQ号@qq.com 邮箱地址，可互相发站内信并附带积分。</p>
+            <div class="card-head">
+              <h3 class="card-title">收件箱 / 发件箱</h3>
+            </div>
+            <div id="mail-list" class="history"></div>
+          </div>
+        </section>
+
+        <section id="page-feedback" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">意见反馈</h2>
+            <p class="hint">遇到问题或有建议？告诉我们，管理员处理后你可以在下方看到回复。</p>
+            <div class="field">
+              <div class="row">
+                <input id="feedback-input" type="text" placeholder="写下你的反馈…（最多1000字）" maxlength="1000" />
+                <button id="feedback-submit-btn" class="btn btn-primary">提 交</button>
+              </div>
+            </div>
+            <p id="feedback-result" class="result"></p>
+            <div class="card-head">
+              <h3 class="card-title">我的反馈</h3>
+            </div>
+            <div id="feedback-mine" class="history"></div>
+          </div>
+        </section>
+
+        <section id="page-tasks" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">每日任务</h2>
+            <p class="hint">完成任务领取额外积分，每天刷新。</p>
+            <div id="tasks-list" class="tasks-list"></div>
+            <p id="tasks-result" class="result"></p>
+          </div>
+        </section>
+
+        <section id="page-auction" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">积分竞拍</h2>
+            <p class="hint">出价即冻结积分，被超价自动退回；竞拍结束最高出价者获得商品。</p>
+            <div id="auction-list" class="auction-list"></div>
+            <p id="auction-result" class="result"></p>
+          </div>
+        </section>
+
+        <section id="page-favorites" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">我的收藏</h2>
+            <div id="favorites-grid" class="image-grid"></div>
+          </div>
+        </section>
+
+        <section id="page-viewer" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">动漫背景观赏</h2>
+              <div class="row-actions">
+                <button id="viewer-page-add" class="btn btn-primary">＋ 加载一张</button>
+                <button id="viewer-page-clear" class="btn">清空</button>
+              </div>
+            </div>
+            <p class="hint">随机动漫背景图库 · 手机长按图片可保存下载 · 可调透明度与显示比例</p>
+            <div class="viewer-controls">
+              <label class="field">
+                <span>透明度：<b id="viewer-page-opacity-val">100%</b></span>
+                <input id="viewer-page-opacity" type="range" min="30" max="100" value="100" />
+              </label>
+              <label class="field">
+                <span>比例</span>
+                <select id="viewer-page-ratio">
+                  <option value="auto">原图比例</option>
+                  <option value="3/4">3:4（竖屏）</option>
+                  <option value="9/16">9:16（竖屏）</option>
+                  <option value="1/1">1:1 方形</option>
+                  <option value="4/3">4:3</option>
+                  <option value="16/9">16:9</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>填充</span>
+                <select id="viewer-page-fit">
+                  <option value="contain">完整显示</option>
+                  <option value="cover">铺满裁剪</option>
+                </select>
+              </label>
+            </div>
+            <p id="viewer-page-result" class="result"></p>
+            <div id="viewer-page-grid" class="viewer-page-grid"></div>
+          </div>
+        </section>
+
+        <section id="page-settings" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">网站设置</h2>
+            <p class="hint">主题与背景设置保存在本浏览器，插件离线也可正常设置使用。</p>
+            <div class="card-head"><h3 class="card-title">连接状态</h3></div>
+            <div id="settings-status" class="settings-status"></div>
+            <div class="row">
+              <label class="field">
+                <span>离线模式（忽略插件同步提示，关闭注册）</span>
+                <input id="settings-offline-switch" type="checkbox" />
+              </label>
+            </div>
+            <div class="card-head"><h3 class="card-title">主题</h3></div>
+            <div class="row">
+              <button id="theme-light-btn" class="btn">☀️ 亮色</button>
+              <button id="theme-dark-btn" class="btn">🌙 暗色</button>
+            </div>
+            <div class="card-head"><h3 class="card-title">动漫背景</h3></div>
+            <div class="row">
+              <label class="field">
+                <span>启用动漫背景</span>
+                <input id="bg-enabled" type="checkbox" />
+              </label>
+              <label class="field">
+                <span>自动换图间隔（秒，0=不自动）</span>
+                <input id="bg-interval" type="number" min="0" max="3600" />
+              </label>
+              <button id="bg-refresh-btn" class="btn">换一张</button>
+              <button id="settings-viewer-btn" class="btn">🎨 去观赏</button>
+            </div>
+            <p class="hint">背景图来自外接 API 随机竖屏动漫图；间隔默认取插件设置，可在这里单独改。</p>
+            <p id="settings-result" class="result"></p>
+            <div class="card-head"><h3 class="card-title">账户</h3></div>
+            <button id="settings-logout-btn" class="btn btn-danger">退出登录</button>
+          </div>
+        </section>
+
+        <section id="page-gomoku" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">五子棋 · 联机对战</h2>
+              <button id="gomoku-create-btn" class="btn btn-primary">＋ 创建房间</button>
+            </div>
+            <p class="hint">1v1 房间对战 · 每 2 秒自动同步 · 轮流落子 · 可对局内聊天</p>
+            <div id="gomoku-result" class="result"></div>
+            <div id="gomoku-room" class="gomoku-room hidden"></div>
+            <div id="gomoku-game" class="gomoku-game hidden">
+              <div class="gm-players" id="gomoku-players"></div>
+              <div class="gm-board-wrap"><div class="gm-board" id="gomoku-board"></div></div>
+              <p id="gomoku-status" class="result"></p>
+              <div class="row-actions">
+                <button id="gomoku-resign-btn" class="btn btn-danger">认输 / 离开</button>
+              </div>
+              <div class="card-head"><h3 class="card-title">对局聊天</h3></div>
+              <div id="gomoku-chat" class="chat-messages gm-chat"></div>
+              <div class="row">
+                <input id="gomoku-chat-input" type="text" placeholder="说点什么…（最多200字）" maxlength="200" />
+                <button id="gomoku-chat-send-btn" class="btn btn-primary">发送</button>
+              </div>
+            </div>
+            <div id="gomoku-lobby">
+              <div class="card-head"><h3 class="card-title">大厅 · 等待加入的房间</h3></div>
+              <div class="row">
+                <input id="gomoku-join-code" type="text" placeholder="输入房间号加入（如 a1b2c3d4）" maxlength="8" />
+                <button id="gomoku-join-btn" class="btn">加入房间</button>
+              </div>
+              <div id="gomoku-waiting" class="history"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="page-board" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">留言板</h2>
+              <span class="hint">每 1 分钟自动刷新</span>
+            </div>
+            <p class="hint">每位用户始终只能留言一条 · 可点赞 / 回复 / 置顶 · 可删除自己的留言（管理员可删除所有人的）</p>
+            <div class="field">
+              <div class="row">
+                <input id="board-input" type="text" placeholder="写点什么…（最多500字）" maxlength="500" />
+                <button id="board-post-btn" class="btn btn-primary">发 布</button>
+              </div>
+            </div>
+            <p id="board-result" class="result"></p>
+            <div id="board-list" class="board-list"></div>
+          </div>
+        </section>
+
+        <section id="page-profile" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">个人资料</h2>
+            <div id="profile-avatar" class="profile-avatar"></div>
+            <p id="profile-info" class="hint"></p>
+            <label class="field">
+              <span>我的永久 UID（用官方机器人发「/积分 绑定 UID」绑定它）</span>
+              <div class="row">
+                <input id="profile-uid-code" type="text" readonly placeholder="注册后自动生成" />
+                <button id="profile-uid-copy" class="btn">复制</button>
+              </div>
+            </label>
+            <div class="field">
+              <span>绑定请求（在此确认或拒绝）</span>
+              <div id="bind-request-list" class="hint">加载中…</div>
+              <button id="bind-request-refresh" class="btn">刷新</button>
+            </div>
+            <div id="profile-badges" class="badges"></div>
+            <div class="field">
+              <span>个性签名</span>
+              <div class="row">
+                <input id="profile-bio" type="text" placeholder="写点什么…（最多200字）" maxlength="200" />
+                <button id="profile-bio-btn" class="btn">保存</button>
+              </div>
+            </div>
+            <p class="hint">修改用户名/密码/转账前，请先私聊机器人发送「/积分 cookieQQ」获取cookieQQ。</p>
+            <label class="field">
+              <span>cookieQQ（私聊获取，每10分钟更新）</span>
+              <input id="profile-verify-id" type="text" placeholder="如 FA75DC20" />
+            </label>
+            <div class="field">
+              <span>修改用户名</span>
+              <div class="row">
+                <input id="profile-new-username" type="text" placeholder="新用户名" />
+                <button id="profile-rename-btn" class="btn">保存</button>
+              </div>
+            </div>
+            <div class="field">
+              <span>修改密码</span>
+              <div class="row">
+                <input id="profile-new-password" type="password" placeholder="新密码" />
+                <button id="profile-password-btn" class="btn">保存</button>
+              </div>
+            </div>
+            <p id="profile-result" class="result"></p>
+          </div>
+          <div class="card">
+            <h2 class="card-title">积分转账</h2>
+            <p class="hint">向指定用户ID转账积分（需cookieQQ）。</p>
+            <div class="row">
+              <input id="transfer-uid" type="text" placeholder="目标用户ID（QQ号/openid）" />
+              <input id="transfer-amount" type="number" min="1" placeholder="金额" />
+              <button id="transfer-btn" class="btn btn-primary">转账</button>
+            </div>
+            <p id="transfer-result" class="result"></p>
+          </div>
+        </section>
+
+        <!-- 管理员页 -->
+        <section id="page-admin-users" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">管理用户</h2>
+            <div class="table-scroll">
+              <table class="table">
+                <thead>
+                  <tr><th>ID</th><th>昵称</th><th>积分</th><th>渠道</th><th>操作</th></tr>
+                </thead>
+                <tbody id="admin-users-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="page-admin-accounts" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">账号管理</h2>
+            <p class="hint">管理网站登录账号：查看密码、改名、重置密码、禁用/启用、设管理员、删除。操作由本地插件执行，稍后生效。</p>
+            <div class="table-scroll">
+              <table class="table">
+                <thead>
+                  <tr><th>用户名</th><th>用户ID</th><th>密码</th><th>状态</th><th>角色</th><th>操作</th></tr>
+                </thead>
+                <tbody id="admin-accounts-body"></tbody>
+              </table>
+            </div>
+            <p id="admin-accounts-result" class="result"></p>
+          </div>
+        </section>
+
+        <section id="page-admin-images" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">管理图片</h2>
+            <div id="admin-images" class="image-grid"></div>
+          </div>
+        </section>
+
+        <section id="page-admin-redeem" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">管理兑换码</h2>
+            <p class="hint">兑换码请到机器人 Web 管理页操作</p>
+          </div>
+        </section>
+
+        <section id="page-admin-redeem-gen" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">批量生成兑换码</h2>
+            <div class="row">
+              <label class="field">
+                <span>每个兑换码积分</span>
+                <input id="admin-redeem-points" type="number" min="1" placeholder="如 10" />
+              </label>
+              <label class="field">
+                <span>生成数量</span>
+                <input id="admin-redeem-count" type="number" min="1" max="200" placeholder="如 10" />
+              </label>
+              <button id="admin-redeem-gen-btn" class="btn btn-primary">生 成</button>
+            </div>
+            <p id="admin-redeem-gen-result" class="result"></p>
+            <div id="admin-redeem-gen-codes" class="history"></div>
+          </div>
+        </section>
+
+        <section id="page-admin-auction" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">创建竞拍</h2>
+            <div class="field">
+              <span>商品名称</span>
+              <input id="admin-auction-name" type="text" placeholder="商品名称（最多100字）" maxlength="100" />
+            </div>
+            <div class="field">
+              <span>商品描述</span>
+              <input id="admin-auction-desc" type="text" placeholder="描述（最多300字）" maxlength="300" />
+            </div>
+            <div class="row">
+              <label class="field">
+                <span>起拍价（积分）</span>
+                <input id="admin-auction-start" type="number" min="0" placeholder="如 10" />
+              </label>
+              <label class="field">
+                <span>加价幅度</span>
+                <input id="admin-auction-increment" type="number" min="1" placeholder="如 5" />
+              </label>
+              <label class="field">
+                <span>时长（小时）</span>
+                <input id="admin-auction-duration" type="number" min="1" placeholder="如 24" />
+              </label>
+            </div>
+            <button id="admin-auction-create-btn" class="btn btn-primary">创建竞拍</button>
+            <p id="admin-auction-result" class="result"></p>
+          </div>
+          <div class="card">
+            <h2 class="card-title">全部竞拍</h2>
+            <div id="admin-auction-all" class="history"></div>
+          </div>
+        </section>
+
+        <section id="page-admin-feedback" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">反馈管理</h2>
+            <div id="admin-feedback-list" class="history"></div>
+          </div>
+        </section>
+
+        <section id="page-admin-ledger" class="page hidden">
+          <div class="card">
+            <div class="card-head">
+              <h2 class="card-title">全服积分使用记录</h2>
+              <button id="admin-ledger-broadcast" class="btn">📣 全服邮件</button>
+            </div>
+            <div class="field">
+              <div class="row">
+                <input id="admin-ledger-uid" type="text" placeholder="按用户ID筛选（留空显示全部）" />
+                <button id="admin-ledger-filter" class="btn">筛选</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="table">
+                <thead>
+                  <tr><th>时间</th><th>用户</th><th>变动</th><th>原因</th><th>备注</th><th>余额</th></tr>
+                </thead>
+                <tbody id="admin-ledger-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="page-admin-shop" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">管理商城</h2>
+            <div id="admin-shop"></div>
+          </div>
+        </section>
+
+        <section id="page-admin-bottles" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">管理漂流瓶</h2>
+            <div id="admin-bottles"></div>
+          </div>
+        </section>
+
+        <section id="page-admin-announcement" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">系统公告</h2>
+            <p id="admin-announcement-current" class="hint"></p>
+            <label class="field">
+              <span>公告内容（留空则清空公告）</span>
+              <textarea id="admin-announcement-input" class="textarea" rows="4" maxlength="1000"></textarea>
+            </label>
+            <button id="admin-announcement-btn" class="btn btn-primary">发布公告</button>
+            <p id="admin-announcement-result" class="result"></p>
+          </div>
+        </section>
+
+        <section id="page-admin-lottery" class="page hidden">
+          <div class="card">
+            <h2 class="card-title">抽奖配置（爆率）</h2>
+            <p class="hint">单次消耗积分与奖品表（名称:积分:权重），权重越大越容易抽中，修改后立即生效。</p>
+            <div class="field">
+              <span>单次消耗积分</span>
+              <input id="admin-lottery-cost" type="number" min="1" />
+            </div>
+            <div id="admin-lottery-prizes" class="prize-editor"></div>
+            <div class="row-actions">
+              <button id="admin-lottery-add-prize" class="btn">+ 添加奖品</button>
+              <button id="admin-lottery-save" class="btn btn-primary">保存配置</button>
+            </div>
+            <p id="admin-lottery-result" class="result"></p>
+          </div>
+          <div class="card">
+            <h2 class="card-title">瓜分池</h2>
+            <p class="hint">设置瓜分池余额后开启新一轮，用户点击「瓜分」随机获得一份积分，瓜分完即清零。</p>
+            <div class="row">
+              <label class="field">
+                <span>瓜分池余额</span>
+                <input id="admin-split-balance" type="number" min="0" placeholder="如 1000" />
+              </label>
+              <label class="field">
+                <span>单次瓜分下限</span>
+                <input id="admin-split-min" type="number" min="1" />
+              </label>
+              <label class="field">
+                <span>单次瓜分上限</span>
+                <input id="admin-split-max" type="number" min="1" />
+              </label>
+            </div>
+            <button id="admin-split-save" class="btn btn-primary">保存瓜分池</button>
+            <p id="admin-split-result" class="result"></p>
+            <div class="card-head">
+              <h3 class="card-title">本轮瓜分记录</h3>
+            </div>
+            <div id="admin-split-records" class="history"></div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="app-footer">
+        数据由机器人实时同步 · 登录后仅能查看自己的数据<br />
+        <span id="footer-version" class="hint"></span>
+      </footer>
+    </main>
+
+    <!-- 写邮件弹窗 -->
+    <div id="mail-compose-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2 class="card-title">写邮件</h2>
+        <label class="field">
+          <span>收件人（QQ号 或 用户名）</span>
+          <input id="mail-to" type="text" placeholder="如 123456" />
+        </label>
+        <label class="field">
+          <span>主题</span>
+          <input id="mail-subject" type="text" placeholder="主题（可选）" maxlength="100" />
+        </label>
+        <label class="field">
+          <span>内容</span>
+          <textarea id="mail-content" class="textarea" rows="4" maxlength="2000"></textarea>
+        </label>
+        <label class="field">
+          <span>附积分（可选，从你的积分扣除）</span>
+          <input id="mail-points" type="number" min="0" placeholder="如 10" />
+        </label>
+        <div class="row-actions">
+          <button id="mail-send-btn" class="btn btn-primary">发 送</button>
+          <button id="mail-cancel-btn" class="btn">取 消</button>
+        </div>
+        <p id="mail-compose-result" class="result"></p>
+      </div>
+    </div>
+
+    <script src="/static/app.js?v=v5.21.39"></script>
+  </body>
+</html>
