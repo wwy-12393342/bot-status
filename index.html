@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>机器人在线状态</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 32px 16px;
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: radial-gradient(1200px 600px at 20% 0%, #1b2333 0%, #0d1117 60%);
+    color: #e6edf3;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 6px; letter-spacing: .5px; }
+  .sub { color: #8b949e; font-size: 13px; margin-bottom: 22px; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .card {
+    border: 1px solid #21262d; border-radius: 14px; padding: 16px 18px;
+    background: linear-gradient(180deg, #161b22 0%, #12171e 100%);
+  }
+  .card .name { font-weight: 600; font-size: 15px; margin-bottom: 4px; word-break: break-all; }
+  .card .desc { color: #8b949e; font-size: 12px; min-height: 16px; margin-bottom: 12px; }
+  .row { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .on  { background: #2ea043; box-shadow: 0 0 10px #2ea04388; }
+  .off { background: #f85149; box-shadow: 0 0 10px #f8514988; }
+  .mid { background: #d29922; box-shadow: 0 0 10px #d2992288; }
+  .st-on { color: #3fb950; } .st-off { color: #f85149; } .st-mid { color: #d29922; }
+  .meta { color: #6e7681; font-size: 12px; margin-top: 10px; }
+  .banner { border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; font-size: 14px; }
+  .banner.ok { background: #0d2a17; border: 1px solid #2ea04355; color: #7ee787; }
+  .banner.bad { background: #2d1214; border: 1px solid #f8514955; color: #ff7b72; }
+  footer { margin-top: 26px; color: #6e7681; font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🤖 机器人在线状态</h1>
+  <div class="sub" id="sub">正在加载…</div>
+  <div id="banner"></div>
+  <div class="grid" id="grid"></div>
+  <footer>数据来源：AstrBot 插件 · 每 30 秒自动刷新</footer>
+</div>
+<script>
+const STALE_MINUTES = 40;
+const DATA_URLS = ["https://raw.githubusercontent.com/wwy-12393342/bot-status/main/status.json", "status.json"];
+
+function cls(status) {
+  if (status === "running") return ["on", "st-on", "在线"];
+  if (status === "pending") return ["mid", "st-mid", "启动中"];
+  if (status === "error") return ["off", "st-off", "异常"];
+  if (status === "stopped") return ["off", "st-off", "已停止"];
+  return ["mid", "st-mid", status || "未知"];
+}
+function ago(ts) {
+  if (!ts) return "未知";
+  const s = Math.max(0, Math.floor(Date.now() / 1000 - ts));
+  if (s < 60) return s + " 秒前";
+  if (s < 3600) return Math.floor(s / 60) + " 分钟前";
+  return Math.floor(s / 3600) + " 小时前";
+}
+async function fetchData() {
+  let lastErr = null;
+  for (const base of DATA_URLS) {
+    try {
+      const url = base + (base.includes("?") ? "&" : "?") + "_=" + Date.now();
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return await res.json();
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error("no data");
+}
+async function refresh() {
+  try {
+    render(await fetchData());
+  } catch (e) {
+    document.getElementById("sub").textContent = "读取状态失败：" + e;
+  }
+}
+function render(data) {
+  const updated = data.updated_at || 0;
+  const stale = (Date.now() / 1000 - updated) > STALE_MINUTES * 60;
+  const bots = data.bots || [];
+  const onlineCount = bots.filter(b => b.status === "running").length;
+
+  document.getElementById("sub").textContent =
+    "共 " + bots.length + " 个平台 · 在线 " + onlineCount + " 个 · 更新于 " + ago(updated);
+
+  const banner = document.getElementById("banner");
+  if (stale) {
+    banner.className = "banner bad";
+    banner.textContent = "⚠️ 页面数据已超过 " + STALE_MINUTES + " 分钟未更新，AstrBot 可能已离线。";
+  } else {
+    banner.className = "banner ok";
+    banner.textContent = "✅ 监控正常，数据实时更新中。";
+  }
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  for (const b of bots) {
+    const [dot, stCls, label] = cls(b.status);
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML =
+      '<div class="name">' + (b.display_name || b.name || b.id) + '</div>' +
+      '<div class="desc">' + (b.description || "") + '</div>' +
+      '<div class="row"><span class="dot ' + dot + '"></span>' +
+      '<span class="' + stCls + '">' + label + '</span></div>' +
+      '<div class="meta">平台：' + (b.name || "-") + ' · ID：' + (b.id || "-") + '</div>';
+    grid.appendChild(div);
+  }
+}
+refresh();
+setInterval(refresh, 30 * 1000);
+</script>
+</body>
+</html>
