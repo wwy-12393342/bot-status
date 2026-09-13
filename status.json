@@ -1,7 +1,7 @@
 {
   "title": "机器人在线状态",
-  "updated_at": 1789278532,
-  "updated_at_text": "2026-09-13 13:48:52",
+  "updated_at": 1789278564,
+  "updated_at_text": "2026-09-13 13:49:24",
   "stale_minutes": 40,
   "realtime": false,
   "bots": [
@@ -65,6 +65,46 @@
       "id": "小爱",
       "name": "aiocqhttp",
       "display_name": "小爱",
+      "description": "适用于 OneBot 标准的消息平台适配器，支持反向 WebSockets。",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "QQ聊天bot",
+      "name": "qq_official",
+      "display_name": "QQ聊天bot",
+      "description": "QQ 机器人官方 API 适配器",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "始砚",
+      "name": "qq_official",
+      "display_name": "始砚",
+      "description": "QQ 机器人官方 API 适配器",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "Teriri",
+      "name": "qq_official",
+      "display_name": "Teriri",
+      "description": "QQ 机器人官方 API 适配器",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "龙禅墨",
+      "name": "qq_official",
+      "display_name": "龙禅墨",
+      "description": "QQ 机器人官方 API 适配器",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "deepseek娘",
+      "name": "aiocqhttp",
+      "display_name": "deepseek娘",
       "description": "适用于 OneBot 标准的消息平台适配器，支持反向 WebSockets。",
       "status": "running",
       "online": true
