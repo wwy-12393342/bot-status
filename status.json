@@ -1,7 +1,7 @@
 {
   "title": "机器人在线状态",
-  "updated_at": 1789272128,
-  "updated_at_text": "2026-09-13 12:02:08",
+  "updated_at": 1789272760,
+  "updated_at_text": "2026-09-13 12:12:40",
   "stale_minutes": 40,
   "realtime": false,
   "bots": [
@@ -98,6 +98,14 @@
       "name": "webchat",
       "display_name": "webchat",
       "description": "webchat",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "deepseek娘",
+      "name": "aiocqhttp",
+      "display_name": "deepseek娘",
+      "description": "适用于 OneBot 标准的消息平台适配器，支持反向 WebSockets。",
       "status": "running",
       "online": true
     }
