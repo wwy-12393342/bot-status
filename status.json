@@ -1,7 +1,7 @@
 {
   "title": "机器人在线状态",
-  "updated_at": 1789278350,
-  "updated_at_text": "2026-09-13 13:45:50",
+  "updated_at": 1789278532,
+  "updated_at_text": "2026-09-13 13:48:52",
   "stale_minutes": 40,
   "realtime": false,
   "bots": [
@@ -42,6 +42,30 @@
       "name": "webchat",
       "display_name": "webchat",
       "description": "webchat",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "QQ官方助手",
+      "name": "qq_official",
+      "display_name": "QQ官方助手",
+      "description": "QQ 机器人官方 API 适配器",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "QQ官方机器人",
+      "name": "qq_official",
+      "display_name": "QQ官方机器人",
+      "description": "QQ 机器人官方 API 适配器",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "小爱",
+      "name": "aiocqhttp",
+      "display_name": "小爱",
+      "description": "适用于 OneBot 标准的消息平台适配器，支持反向 WebSockets。",
       "status": "running",
       "online": true
     }
