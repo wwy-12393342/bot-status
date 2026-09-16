@@ -1,7 +1,7 @@
 {
   "title": "机器人在线状态",
-  "updated_at": 1789558963,
-  "updated_at_text": "2026-09-16 19:42:43",
+  "updated_at": 1789560196,
+  "updated_at_text": "2026-09-16 20:03:16",
   "stale_minutes": 40,
   "realtime": false,
   "bots": [
@@ -81,14 +81,6 @@
       "id": "Teriri",
       "name": "qq_official",
       "display_name": "Teriri",
-      "description": "QQ 机器人官方 API 适配器",
-      "status": "running",
-      "online": true
-    },
-    {
-      "id": "龙禅墨",
-      "name": "qq_official",
-      "display_name": "龙禅墨",
       "description": "QQ 机器人官方 API 适配器",
       "status": "running",
       "online": true
