@@ -1,7 +1,7 @@
 {
   "title": "机器人在线状态",
-  "updated_at": 1789683022,
-  "updated_at_text": "2026-09-18 06:10:22",
+  "updated_at": 1789684433,
+  "updated_at_text": "2026-09-18 06:33:53",
   "stale_minutes": 40,
   "realtime": false,
   "bots": [
@@ -86,14 +86,6 @@
       "online": true
     },
     {
-      "id": "龙禅墨",
-      "name": "qq_official",
-      "display_name": "龙禅墨",
-      "description": "QQ 机器人官方 API 适配器",
-      "status": "running",
-      "online": true
-    },
-    {
       "id": "deepseek娘",
       "name": "aiocqhttp",
       "display_name": "deepseek娘",
@@ -106,6 +98,14 @@
       "name": "webchat",
       "display_name": "webchat",
       "description": "webchat",
+      "status": "running",
+      "online": true
+    },
+    {
+      "id": "龙禅墨",
+      "name": "qq_official",
+      "display_name": "龙禅墨",
+      "description": "QQ 机器人官方 API 适配器",
       "status": "running",
       "online": true
     }
