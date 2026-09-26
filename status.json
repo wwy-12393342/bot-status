@@ -1,7 +1,7 @@
 {
   "title": "机器人在线状态",
-  "updated_at": 1790419785,
-  "updated_at_text": "2026-09-26 18:49:46",
+  "updated_at": 1790428073,
+  "updated_at_text": "2026-09-26 21:07:53",
   "stale_minutes": 40,
   "realtime": false,
   "bots": [
@@ -10,24 +10,24 @@
       "name": "qq_official",
       "display_name": "QQ官方助手",
       "description": "QQ 机器人官方 API 适配器",
-      "status": "running",
-      "online": true
+      "status": "error",
+      "online": false
     },
     {
       "id": "QQ官方机器人",
       "name": "qq_official",
       "display_name": "QQ官方机器人",
       "description": "QQ 机器人官方 API 适配器",
-      "status": "running",
-      "online": true
+      "status": "error",
+      "online": false
     },
     {
       "id": "QQ聊天bot",
       "name": "qq_official",
       "display_name": "QQ聊天bot",
       "description": "QQ 机器人官方 API 适配器",
-      "status": "running",
-      "online": true
+      "status": "error",
+      "online": false
     },
     {
       "id": "小爱",
@@ -74,24 +74,24 @@
       "name": "qq_official",
       "display_name": "始砚",
       "description": "QQ 机器人官方 API 适配器",
-      "status": "running",
-      "online": true
+      "status": "error",
+      "online": false
     },
     {
       "id": "Teriri",
       "name": "qq_official",
       "display_name": "Teriri",
       "description": "QQ 机器人官方 API 适配器",
-      "status": "running",
-      "online": true
+      "status": "error",
+      "online": false
     },
     {
       "id": "龙禅墨",
       "name": "qq_official",
       "display_name": "龙禅墨",
       "description": "QQ 机器人官方 API 适配器",
-      "status": "running",
-      "online": true
+      "status": "error",
+      "online": false
     },
     {
       "id": "deepseek娘",
