@@ -1,7 +1,7 @@
 {
   "title": "机器人在线状态",
-  "updated_at": 1792252545,
-  "updated_at_text": "2026-10-17 23:55:45",
+  "updated_at": 1792252577,
+  "updated_at_text": "2026-10-17 23:56:17",
   "stale_minutes": 40,
   "realtime": false,
   "bots": [
@@ -41,22 +41,6 @@
       "id": "小爱(新)",
       "name": "aiocqhttp",
       "display_name": "小爱(新)",
-      "description": "适用于 OneBot 标准的消息平台适配器，支持反向 WebSockets。",
-      "status": "running",
-      "online": true
-    },
-    {
-      "id": "SnowLuma2",
-      "name": "aiocqhttp",
-      "display_name": "SnowLuma2",
-      "description": "适用于 OneBot 标准的消息平台适配器，支持反向 WebSockets。",
-      "status": "running",
-      "online": true
-    },
-    {
-      "id": "SnowLuma3",
-      "name": "aiocqhttp",
-      "display_name": "SnowLuma3",
       "description": "适用于 OneBot 标准的消息平台适配器，支持反向 WebSockets。",
       "status": "running",
       "online": true
