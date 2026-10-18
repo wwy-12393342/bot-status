@@ -1,7 +1,7 @@
 {
   "title": "机器人在线状态",
-  "updated_at": 1792335654,
-  "updated_at_text": "2026-10-18 23:00:54",
+  "updated_at": 1792335956,
+  "updated_at_text": "2026-10-18 23:05:56",
   "stale_minutes": 40,
   "realtime": false,
   "bots": [
@@ -17,14 +17,6 @@
       "id": "QQ官方机器人",
       "name": "qq_official",
       "display_name": "QQ官方机器人",
-      "description": "QQ 机器人官方 API 适配器",
-      "status": "running",
-      "online": true
-    },
-    {
-      "id": "QQ聊天bot",
-      "name": "qq_official",
-      "display_name": "QQ聊天bot",
       "description": "QQ 机器人官方 API 适配器",
       "status": "running",
       "online": true
